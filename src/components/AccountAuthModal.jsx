@@ -255,10 +255,13 @@ export default function AccountAuthModal({
         await savePersonalReflectionToAccount();
         setView('post_save_clinician_consent');
       } else {
-        setView('vault');
-        setSuccessNotice(`Welcome back, ${data.user.displayName || data.user.nickname || 'User'}!`);
-        fetchUserData();
-        fetchSecurityStatus();
+        // Successful login:
+        // Celebrate and smoothly return user directly to the Home page with their active session!
+        setSuccessNotice(`Welcome back, ${data.user.displayName || data.user.nickname || 'User'}! Returning to Home...`);
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+        setTimeout(() => {
+          onClose();
+        }, 600);
       }
     } catch (err) {
       setLoading(false);
@@ -1231,15 +1234,25 @@ export default function AccountAuthModal({
                 </div>
               </div>
               
-              <button
-                type="button"
-                onClick={onLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-stone-50 text-slate-600 hover:text-slate-900 text-xs font-bold transition-colors cursor-pointer"
-                title="Log out of this device"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Logout</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-stone-50 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                  title="Return to Home Page"
+                >
+                  <span>Home Page →</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-bold transition-colors cursor-pointer"
+                  title="Log out of this device"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
 
             {/* 4 Dashboard Tabs */}
