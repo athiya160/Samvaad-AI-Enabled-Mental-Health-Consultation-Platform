@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-slate-800 bg-[#fbfaf8] antialiased selection:bg-emerald-100 selection:text-emerald-950 font-sans;
+  }
+}
+
+/* Custom scrollbars for chat */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(82, 137, 114, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(82, 137, 114, 0.35);
+}
+
+@keyframes pulseGently {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulseGently 4s ease-in-out infinite;
+}
+
+.animate-float-soft {
+  animation: floatSoft 6s ease-in-out infinite;
+}
+
+/* Glassmorphic and ambient utility styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 237, 231, 0.8);
+}
+
+/* Clinical Document Print & EHR Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header, footer, .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .clinical-document-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Suppress Netlify collaborative drawer / HUD badge */
+#nl-badge-frame,
+iframe#nl-badge-frame,
+iframe[id*="nl-badge"],
+iframe[title*="Netlify"],
+iframe[title*="Powered by Netlify"],
+#netlify-hud,
+.netlify-hud,
+[data-netlify-hud],
+iframe[src*="netlify"],
+iframe#netlify-hud,
+div[class*="netlify-hud"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: -99999px !important;
+}
