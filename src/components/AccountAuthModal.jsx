@@ -596,7 +596,7 @@ export default function AccountAuthModal({
         </button>
 
         {/* Global Error Banner */}
-        {errorMessage && (
+        {errorMessage && view !== 'login' && (
           <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
             <p>{errorMessage}</p>
