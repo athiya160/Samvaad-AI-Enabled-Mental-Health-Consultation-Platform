@@ -1,4 +1,4 @@
-﻿# Samvaad (ಸಂವಾದ) — Mental Health Platform
+# Samvaad (ಸಂವಾದ) — Mental Health Platform
 
 > **Affordable, Stigma-Free Mental Health Care for Bharat**  
 > An empathetic, bilingual (English & Kannada) conversational mental-health platform with non-diagnostic personal reflections, privacy-preserving pseudonymous accounts, single-use recovery code security, and seamless pathways to licensed psychiatric consultation.
