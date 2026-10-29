@@ -3,13 +3,13 @@ import { X, CheckCircle, Video, Phone, MessageSquare, Calendar, Clock, FileText,
 import { useLanguage } from '../context/LanguageContext';
 import confetti from 'canvas-confetti';
 
-export default function BookingModal({ doctor, prefilledSummary, onClose, onConfirmBooking }) {
+export default function BookingModal({ doctor, prefilledSummary, currentUser, onClose, onConfirmBooking, onViewDoctorPortal }) {
   const { language } = useLanguage();
   const [mode, setMode] = useState('video'); // 'chat' | 'audio' | 'video'
   const [selectedDate, setSelectedDate] = useState('Today, Oct 19');
   const [selectedSlot, setSelectedSlot] = useState('4:30 PM - 5:15 PM');
-  const [attachSummary, setAttachSummary] = useState(!!prefilledSummary);
-  const [patientName, setPatientName] = useState('Rahul K. (or Anonymous)');
+  const [attachSummary, setAttachSummary] = useState(true);
+  const [patientName, setPatientName] = useState(currentUser?.displayName || currentUser?.nickname || 'Rahul K. (or Anonymous)');
   const [patientPhone, setPatientPhone] = useState('+91 98765 43210');
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [isReviewingSummary, setIsReviewingSummary] = useState(false);
@@ -20,7 +20,72 @@ export default function BookingModal({ doctor, prefilledSummary, onClose, onConf
   const currentPrice = doctor.pricing[mode];
   const isPsychiatrist = doctor.title.toLowerCase().includes('psychiatrist');
 
-  const summaryToReview = prefilledSummary?.clinicianSummary || prefilledSummary?.clinicalDossier || prefilledSummary;
+  const rawSummary = prefilledSummary?.clinicianSummary || prefilledSummary?.clinicalDossier || prefilledSummary?.reflection || prefilledSummary;
+
+  const chiefComplaintText = 
+    rawSummary?.chiefComplaint ||
+    rawSummary?.section1_PresentingComplaints ||
+    (Array.isArray(rawSummary?.sectionA_MainConcerns) ? rawSummary.sectionA_MainConcerns.join(', ') : rawSummary?.sectionA_MainConcerns) ||
+    rawSummary?.coreTheme ||
+    (rawSummary?.exploredTopics ? rawSummary.exploredTopics.join(', ') : 'Reported progressive emotional exhaustion, delayed sleep onset, and persistent work-related concerns.');
+
+  const durationText = 
+    rawSummary?.durationAndOnset ||
+    rawSummary?.section2_HistoryOfPresentProblem ||
+    rawSummary?.sectionC_Timeline ||
+    'Reported subacute onset (~several weeks duration).';
+
+  const moodAffectText = 
+    rawSummary?.patientReportedThemes?.moodAffect ||
+    rawSummary?.psychiatricReviewOfSystems?.moodAffect ||
+    (rawSummary?.sectionB_ExperiencesDiscussed?.emotions ? (Array.isArray(rawSummary.sectionB_ExperiencesDiscussed.emotions) ? rawSummary.sectionB_ExperiencesDiscussed.emotions.join(', ') : rawSummary.sectionB_ExperiencesDiscussed.emotions) : 'Reported feelings of emotional exhaustion and occasional irritability.');
+
+  const sleepText = 
+    rawSummary?.patientReportedThemes?.sleepArchitecture ||
+    rawSummary?.psychiatricReviewOfSystems?.sleepArchitecture ||
+    (rawSummary?.sectionB_ExperiencesDiscussed?.behaviours ? (Array.isArray(rawSummary.sectionB_ExperiencesDiscussed.behaviours) ? rawSummary.sectionB_ExperiencesDiscussed.behaviours.join(', ') : rawSummary.sectionB_ExperiencesDiscussed.behaviours) : 'Reported delayed sleep onset and restless awakenings.');
+
+  const cognitionText = 
+    rawSummary?.patientReportedThemes?.cognitionThoughts ||
+    rawSummary?.psychiatricReviewOfSystems?.cognitionThoughts ||
+    (rawSummary?.sectionB_ExperiencesDiscussed?.thoughts ? (Array.isArray(rawSummary.sectionB_ExperiencesDiscussed.thoughts) ? rawSummary.sectionB_ExperiencesDiscussed.thoughts.join(', ') : rawSummary.sectionB_ExperiencesDiscussed.thoughts) : 'Reported persistent work concerns and looping thoughts when unwinding.');
+
+  const somaticText = 
+    rawSummary?.patientReportedThemes?.somaticAutonomic ||
+    rawSummary?.psychiatricReviewOfSystems?.somaticAutonomic ||
+    'Reported occasional tension headaches under stress.';
+
+  const safetyText = 
+    rawSummary?.patientReportedThemes?.safetyScreen ||
+    rawSummary?.section13_RiskAssessment ||
+    'Demonstration conversational screen: No crisis keywords identified in pre-consult conversation. (Independent clinical assessment required).';
+
+  const unexploredList = rawSummary?.unexploredAreas || [
+    'Detailed medical / psychiatric history',
+    'Past/current medication adherence',
+    'Substance use or somatic comorbidities',
+    'Formal psychometric assessment (to be administered by clinician if indicated)'
+  ];
+
+  const summaryToReview = {
+    dossierId: rawSummary?.dossierId || `DOS-${Math.floor(100000 + Math.random() * 900000)}`,
+    patientId: patientName,
+    timestamp: rawSummary?.timestamp || 'Today (Intake Session)',
+    chiefComplaint: chiefComplaintText,
+    durationAndOnset: durationText,
+    section1_PresentingComplaints: chiefComplaintText,
+    section2_HistoryOfPresentProblem: durationText,
+    patientReportedThemes: {
+      moodAffect: moodAffectText,
+      sleepArchitecture: sleepText,
+      cognitionThoughts: cognitionText,
+      somaticAutonomic: somaticText,
+      safetyScreen: safetyText
+    },
+    unexploredAreas: unexploredList,
+    clinicalContextNote: rawSummary?.clinicalContextNote || 'Demonstration Pre-Consultation Summary: Preliminary context synthesized from patient conversation. Requires independent clinical assessment and treatment planning by Dr. Alan Samuel.',
+    ...rawSummary
+  };
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
@@ -97,10 +162,21 @@ export default function BookingModal({ doctor, prefilledSummary, onClose, onConf
 
             <div className="pt-4 flex flex-col gap-2">
               <button
-                onClick={onClose}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-sage-700 via-sage-600 to-emerald-600 hover:from-sage-800 hover:to-emerald-700 text-white font-bold text-sm shadow-soft-md shadow-sage-900/20 transition-all cursor-pointer"
+                onClick={() => {
+                  onClose();
+                  if (onViewDoctorPortal) onViewDoctorPortal();
+                }}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-black text-sm shadow-soft-md shadow-emerald-900/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
-                {language === 'kn' ? 'ಡೆಮೊಗೆ ಹಿಂತಿರುಗಿ' : 'Return to Demo'}
+                <Stethoscope className="w-4 h-4" />
+                <span>{language === 'kn' ? 'ವೈದ್ಯರ ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ವೀಕ್ಷಿಸಿ →' : 'View in Doctor Portal →'}</span>
+              </button>
+
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 text-slate-600 font-bold text-xs transition-all cursor-pointer"
+              >
+                {language === 'kn' ? 'ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ' : 'Return to Home'}
               </button>
             </div>
           </div>

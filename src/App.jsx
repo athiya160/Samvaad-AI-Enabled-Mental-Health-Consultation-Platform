@@ -24,6 +24,7 @@ function MainApp() {
   // Modals state
   const [reflectionData, setReflectionData] = useState(null);
   const [activeSummaryToSave, setActiveSummaryToSave] = useState(null);
+  const [bookingSummaryToAttach, setBookingSummaryToAttach] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalInitialView, setAuthModalInitialView] = useState('auth_prompt');
   const [isSpecsDocOpen, setIsSpecsDocOpen] = useState(false);
@@ -118,17 +119,26 @@ function MainApp() {
   const handleOpenReflectionModal = (data) => {
     setReflectionData(data);
     setActiveSummaryToSave(data);
+    setBookingSummaryToAttach(data);
   };
 
   const handleOpenSaveModalFromReflection = (summary) => {
-    setActiveSummaryToSave(summary || reflectionData);
+    const sum = summary || reflectionData;
+    setActiveSummaryToSave(sum);
+    setBookingSummaryToAttach(sum);
     setReflectionData(null);
     setAuthModalInitialView('auth_prompt');
     setIsAuthModalOpen(true);
   };
 
   const handleBookDoctorFromSummary = (dossier) => {
+    const summary = dossier || bookingSummaryToAttach || activeSummaryToSave || reflectionData;
+    if (summary) {
+      setBookingSummaryToAttach(summary);
+      setActiveSummaryToSave(summary);
+    }
     setReflectionData(null);
+    setIsAuthModalOpen(false);
     const drAlan = CONSULTANTS.find(c => c.id === 'dr-alan-samuel') || CONSULTANTS[0];
     setSelectedDoctorForBooking(drAlan);
   };
@@ -424,9 +434,14 @@ function MainApp() {
       {selectedDoctorForBooking && (
         <BookingModal
           doctor={selectedDoctorForBooking}
-          prefilledSummary={activeSummaryToSave || reflectionData}
+          prefilledSummary={bookingSummaryToAttach || activeSummaryToSave || reflectionData}
+          currentUser={currentUser}
           onClose={() => setSelectedDoctorForBooking(null)}
           onConfirmBooking={handleConfirmAppointment}
+          onViewDoctorPortal={() => {
+            setSelectedDoctorForBooking(null);
+            setActiveTab('doctor-portal');
+          }}
         />
       )}
 

@@ -281,7 +281,7 @@ ${EXACT_MANDATORY_DISCLAIMER}
                 </p>
                 <div className="flex flex-wrap items-center gap-2.5 mt-3.5">
                   <button
-                    onClick={() => onBookDoctor(clinicalDossier)}
+                    onClick={() => onBookDoctor(clinicalDossier || reflection || data)}
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sage-700 via-sage-600 to-emerald-600 hover:from-sage-800 hover:to-emerald-700 text-white font-black text-xs shadow-soft-sm hover:shadow-glow-sage transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <Stethoscope className="w-3.5 h-3.5" />

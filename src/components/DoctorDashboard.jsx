@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stethoscope, Calendar, Clock, Video, Phone, MessageSquare, FileText, CheckCircle2, User, Activity, AlertCircle, ShieldCheck, ChevronRight, Play, Printer, Award, FileCheck, ShieldAlert, Copy, Check, ExternalLink, BarChart3, Brain, Info, HelpCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import confetti from 'canvas-confetti';
@@ -8,7 +8,66 @@ export default function DoctorDashboard({ appointments, onLaunchConsultationRoom
   const [selectedAppointment, setSelectedAppointment] = useState(appointments[0] || null);
   const [copiedSoap, setCopiedSoap] = useState(false);
 
-  const activeDossier = selectedAppointment?.summaryData?.clinicalDossier || {
+  useEffect(() => {
+    if (appointments && appointments.length > 0) {
+      setSelectedAppointment(appointments[0]);
+    }
+  }, [appointments]);
+
+  const rawDossier = selectedAppointment?.summaryData?.clinicalDossier || selectedAppointment?.summaryData;
+
+  const activeDossier = rawDossier ? {
+    dossierId: rawDossier.dossierId || `DOS-${selectedAppointment?.id || '819203'}`,
+    patientId: selectedAppointment?.patientName || rawDossier.patientId || 'Patient',
+    timestamp: rawDossier.timestamp || selectedAppointment?.date || 'Today',
+    chiefComplaint: 
+      rawDossier.chiefComplaint || 
+      rawDossier.section1_PresentingComplaints || 
+      (Array.isArray(rawDossier.sectionA_MainConcerns) ? rawDossier.sectionA_MainConcerns.join(', ') : rawDossier.sectionA_MainConcerns) || 
+      rawDossier.coreTheme || 
+      (rawDossier.exploredTopics ? rawDossier.exploredTopics.join(', ') : 'Reported emotional fatigue and work pressures.'),
+    durationAndOnset: 
+      rawDossier.durationAndOnset || 
+      rawDossier.section2_HistoryOfPresentProblem || 
+      rawDossier.sectionC_Timeline || 
+      'Reported subacute onset (~several weeks duration).',
+    patientReportedThemes: {
+      moodAffect: 
+        rawDossier.patientReportedThemes?.moodAffect || 
+        rawDossier.psychiatricReviewOfSystems?.moodAffect || 
+        (rawDossier.sectionB_ExperiencesDiscussed?.emotions 
+          ? (Array.isArray(rawDossier.sectionB_ExperiencesDiscussed.emotions) ? rawDossier.sectionB_ExperiencesDiscussed.emotions.join(', ') : rawDossier.sectionB_ExperiencesDiscussed.emotions) 
+          : 'Reported feelings of emotional exhaustion and stress.'),
+      sleepArchitecture: 
+        rawDossier.patientReportedThemes?.sleepArchitecture || 
+        rawDossier.psychiatricReviewOfSystems?.sleepArchitecture || 
+        (rawDossier.sectionB_ExperiencesDiscussed?.behaviours 
+          ? (Array.isArray(rawDossier.sectionB_ExperiencesDiscussed.behaviours) ? rawDossier.sectionB_ExperiencesDiscussed.behaviours.join(', ') : rawDossier.sectionB_ExperiencesDiscussed.behaviours) 
+          : 'Reported delayed sleep onset and restless awakenings.'),
+      cognitionThoughts: 
+        rawDossier.patientReportedThemes?.cognitionThoughts || 
+        rawDossier.psychiatricReviewOfSystems?.cognitionThoughts || 
+        (rawDossier.sectionB_ExperiencesDiscussed?.thoughts 
+          ? (Array.isArray(rawDossier.sectionB_ExperiencesDiscussed.thoughts) ? rawDossier.sectionB_ExperiencesDiscussed.thoughts.join(', ') : rawDossier.sectionB_ExperiencesDiscussed.thoughts) 
+          : 'Reported persistent work concerns and looping thoughts.'),
+      somaticAutonomic: 
+        rawDossier.patientReportedThemes?.somaticAutonomic || 
+        rawDossier.psychiatricReviewOfSystems?.somaticAutonomic || 
+        'Reported occasional tension headaches under stress.',
+      safetyScreen: 
+        rawDossier.patientReportedThemes?.safetyScreen || 
+        rawDossier.section13_RiskAssessment || 
+        'Pre-consultation screen: No crisis keywords identified in pre-consult conversation. Full clinical safety evaluation to be conducted by clinician.'
+    },
+    unexploredAreas: rawDossier.unexploredAreas || [
+      'Detailed medical / psychiatric history',
+      'Past/current medication adherence',
+      'Substance use or somatic comorbidities',
+      'Formal psychometric assessment (to be administered by clinician if indicated)'
+    ],
+    clinicalContextNote: rawDossier.clinicalContextNote || 'Preliminary context synthesized from patient conversation. Requires independent clinical assessment and treatment planning by Dr. Alan Samuel.',
+    patientClarification: rawDossier.patientClarification || ''
+  } : {
     dossierId: 'DOS-819203 [Demo]',
     patientId: selectedAppointment?.patientName || 'Sample Patient A [Fictional Demo Record]',
     timestamp: 'Today, 2:15 PM (Demo)',
@@ -27,7 +86,8 @@ export default function DoctorDashboard({ appointments, onLaunchConsultationRoom
       'Substance use or somatic comorbidities',
       'Formal psychometric assessment (to be administered by clinician if indicated)'
     ],
-    clinicalContextNote: 'Demonstration Pre-Consultation Summary: Preliminary context synthesized from sample patient conversation. Requires independent clinical assessment and treatment planning by Dr. Alan Samuel.'
+    clinicalContextNote: 'Demonstration Pre-Consultation Summary: Preliminary context synthesized from sample patient conversation. Requires independent clinical assessment and treatment planning by Dr. Alan Samuel.',
+    patientClarification: ''
   };
 
   const handleCopySoapNote = () => {
@@ -345,6 +405,14 @@ Date: ${new Date().toLocaleDateString('en-IN')}
                 <div className="p-4 rounded-xl bg-stone-50/80 border border-stone-200 text-slate-900 leading-relaxed text-sm italic">
                   "{activeDossier.chiefComplaint}"
                 </div>
+                {activeDossier.patientClarification && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-950">
+                    <span className="font-bold block text-[11px] uppercase tracking-wider text-emerald-900 mb-0.5 font-mono">
+                      Patient Clarification / Correction:
+                    </span>
+                    <p className="italic">"{activeDossier.patientClarification}"</p>
+                  </div>
+                )}
               </div>
 
               {/* Section 2: Chronology & Progression */}

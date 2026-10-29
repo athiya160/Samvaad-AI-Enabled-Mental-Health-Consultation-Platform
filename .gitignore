@@ -37,3 +37,10 @@ server/data/
 Thumbs.db
 .vscode
 .idea
+
+# Proposals & Internal Planning
+*Proposal*
+*PROPOSAL*
+*PLAN*
+generate_proposal_pdf.py
+

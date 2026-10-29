@@ -1179,15 +1179,29 @@ export default function AccountAuthModal({
               </p>
             </div>
 
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setViewingClinicianDossier(savedClinicianSummary)}
-                className="flex-1 py-3 px-4 rounded-xl border border-stone-200 hover:bg-stone-50 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-soft-sm"
+                className="w-full sm:flex-1 py-3 px-3 rounded-xl border border-stone-200 hover:bg-stone-50 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-soft-sm"
               >
                 <Eye className="w-4 h-4 text-emerald-700" />
                 <span>Review 14 Headings</span>
               </button>
+
+              {onBookDoctorWithSummary && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onBookDoctorWithSummary(savedClinicianSummary);
+                  }}
+                  className="w-full sm:flex-1 py-3 px-3 rounded-xl bg-gradient-to-r from-sage-700 via-sage-600 to-emerald-600 hover:from-sage-800 hover:to-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-soft-sm"
+                >
+                  <Stethoscope className="w-4 h-4 text-emerald-100" />
+                  <span>Book Consultation</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -1196,7 +1210,7 @@ export default function AccountAuthModal({
                   fetchUserData();
                   fetchSecurityStatus();
                 }}
-                className="flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer shadow-soft-sm"
+                className="w-full sm:flex-1 py-3 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer shadow-soft-sm"
               >
                 Open My Account
               </button>
@@ -1435,6 +1449,22 @@ export default function AccountAuthModal({
                             <Edit3 className="w-3 h-3" />
                             <span>Review/correct</span>
                           </button>
+                          {onBookDoctorWithSummary && (
+                            <>
+                              <span className="text-stone-300">•</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onClose();
+                                  onBookDoctorWithSummary(item.clinicianSummary);
+                                }}
+                                className="text-emerald-700 font-bold hover:text-emerald-900 flex items-center gap-1 cursor-pointer"
+                              >
+                                <Stethoscope className="w-3 h-3" />
+                                <span>Book</span>
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         <button
